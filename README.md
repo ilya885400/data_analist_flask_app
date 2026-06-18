@@ -43,15 +43,7 @@ pip install -r requirements.txt
 
 ```
 
-### 3. Переменные окружения (Опционально)
-
-Вы можете задать дефолтный ключ OpenRouter прямо в системе, чтобы не вводить его в браузере:
-
-```bash
-export OPENROUTER_API_KEY="your_sk_or_api_key_here"
-```
-
-### 4. Запуск приложения
+### 3. Запуск приложения
 
 ```bash
 python app.py
