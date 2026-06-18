@@ -19,10 +19,14 @@ app.config['UPLOAD_FOLDER'] = 'uploads'
 # ── OpenRouter config ─────────────────────────────────────────────────────────
 
 API_URL = "https://openrouter.ai/api/v1/chat/completions"
-# Модель по умолчанию, если пользователь оставил поле пустым
+# Модели с поддержкой tool calling (раскомментируй нужную):
 MODEL = "poolside/laguna-xs.2:free"
-REQUEST_TIMEOUT = 300  # секунд
-OPENROUTER_API_KEY = os.environ.get("OPENROUTER_API_KEY", "your_api")
+#"qwen/qwen-2.5-72b-instruct:free"
+# MODEL = "meta-llama/llama-3.3-70b-instruct:free"
+# MODEL = "nvidia/nemotron-3-ultra-550b-a55b:free"  # очень медленная, таймаут 300с
+# MODEL = "microsoft/mai-ds-r1:free"
+REQUEST_TIMEOUT = 300  # секунд; для nemotron ставь 300+
+OPENROUTER_API_KEY = os.environ.get("OPENROUTER_API_KEY", "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")
 
 # ── Prompt Injection Protection ───────────────────────────────────────────────
 
@@ -87,7 +91,21 @@ def ensure_docker_image():
 
 
 def execute_python_code(code: str, data_path: str) -> dict:
-    """Execute Python code inside an isolated Docker container."""
+    """
+    Execute Python code inside an isolated Docker container.
+
+    Security constraints applied to the container:
+      --network none       — no internet access
+      --memory 512m        — RAM cap
+      --cpus 1.0           — CPU cap
+      --read-only          — read-only root filesystem
+      --tmpfs /tmp         — only /tmp is writable (for matplotlib cache etc.)
+      --cap-drop ALL       — drop all Linux capabilities
+      --security-opt no-new-privileges
+
+    The dataset is bind-mounted read-only at /data/dataset.<ext>.
+    The script is bind-mounted read-only from a temp dir.
+    """
     ext = Path(data_path).suffix
     container_dataset_path = f"/data/dataset{ext}"
 
@@ -136,6 +154,8 @@ print("__FIGURES__:" + json.dumps(_figures))
         with open(script_path, "w", encoding="utf-8") as f:
             f.write(full_code)
 
+        # Даём права на чтение всем — иначе Docker-контейнер (другой uid)
+        # получает "Permission denied" при попытке открыть /workspace/script.py
         os.chmod(workdir, 0o755)
         os.chmod(script_path, 0o644)
 
@@ -186,6 +206,7 @@ print("__FIGURES__:" + json.dumps(_figures))
         }
 
     except subprocess.TimeoutExpired:
+        # Kill any lingering container
         subprocess.run(["docker", "ps", "-q", "--filter", "ancestor=" + DOCKER_SANDBOX_IMAGE],
                        capture_output=True)
         return {
@@ -260,20 +281,16 @@ TOOLS = [
 ]
 
 
-def call_openrouter(messages: list, force_tool: bool = False, api_key: str = None, model_name: str = None) -> dict:
-    """Single call to OpenRouter chat completions with dynamic model/key handling."""
-    # Используем переданный ключ/модель или падаем на дефолтные значения сервера
-    chosen_key = api_key if api_key and api_key.strip() else OPENROUTER_API_KEY
-    chosen_model = model_name if model_name and model_name.strip() else MODEL
-
+def call_openrouter(messages: list, force_tool: bool = False) -> dict:
+    """Single call to OpenRouter chat completions."""
     headers = {
-        "Authorization": f"Bearer {chosen_key}",
+        "Authorization": f"Bearer {OPENROUTER_API_KEY}",
         "Content-Type": "application/json",
         "HTTP-Referer": "https://datamind.local",
         "X-Title": "DataMind Analytics",
     }
     payload = {
-        "model": chosen_model,
+        "model": MODEL,
         "messages": messages,
         "tools": TOOLS,
         "tool_choice": "required" if force_tool else "auto",
@@ -281,20 +298,24 @@ def call_openrouter(messages: list, force_tool: bool = False, api_key: str = Non
     }
     resp = requests.post(API_URL, headers=headers, json=payload, timeout=REQUEST_TIMEOUT)
 
+    # Подробная ошибка при неудаче
     if not resp.ok:
         raise requests.HTTPError(
             f"OpenRouter {resp.status_code}: {resp.text[:500]}", response=resp
         )
 
     data = resp.json()
+
+    # Некоторые модели возвращают ошибку внутри 200-ответа
     if "error" in data:
         raise RuntimeError(f"OpenRouter error: {data['error']}")
 
     return data
 
 
-def run_agent(data_path: str, user_context: str, api_key: str = None, model_name: str = None) -> dict:
+def run_agent(data_path: str, user_context: str) -> dict:
     """Agentic loop: LLM calls execute_code tool until done."""
+
     user_message = "Проведи полный анализ датасета по пути DATASET_PATH."
     if user_context:
         user_message += f"\n\nДополнительный контекст и фокус анализа:\n{user_context}"
@@ -306,23 +327,32 @@ def run_agent(data_path: str, user_context: str, api_key: str = None, model_name
 
     all_figures    = []
     tool_calls_log = []
-    last_text      = ""
+    last_text      = ""  # последний текст от ассистента — fallback для отчёта
 
     for iteration in range(15):
         force_tool = (iteration == 0)
-        print(f"\n[agent] ── Итерация {iteration + 1} | Модель: {model_name or MODEL} ──")
+        print(f"\n[agent] ── Итерация {iteration + 1} | force_tool={force_tool} ──")
 
-        # Передаем динамические параметры в каждую итерацию вызова API
-        data    = call_openrouter(messages, force_tool=force_tool, api_key=api_key, model_name=model_name)
+        data    = call_openrouter(messages, force_tool=force_tool)
         choice  = data["choices"][0]
         message = choice["message"]
 
+        finish_reason = choice.get("finish_reason", "?")
         tool_calls    = message.get("tool_calls") or []
         content_text  = message.get("content") or ""
+
+        print(f"[agent] finish_reason={finish_reason!r} | tool_calls={len(tool_calls)} | content_len={len(content_text)}")
+        if content_text:
+            print(f"[agent] content preview: {content_text[:200]!r}")
+        if tool_calls:
+            for tc in tool_calls:
+                args_preview = tc["function"].get("arguments", "")[:120]
+                print(f"[agent] tool_call: {tc['function']['name']} | args: {args_preview!r}")
 
         if content_text:
             last_text = content_text
 
+        # Формируем assistant message без лишних полей
         assistant_msg: dict = {
             "role":    "assistant",
             "content": content_text,
@@ -341,13 +371,16 @@ def run_agent(data_path: str, user_context: str, api_key: str = None, model_name
             ]
         messages.append(assistant_msg)
 
+        # Нет вызовов инструментов → LLM завершила работу
         if not tool_calls:
+            print(f"[agent] ✓ Завершено без tool calls — возвращаем отчёт ({len(content_text)} симв.)")
             return {
                 "report":     content_text,
                 "figures":    all_figures,
                 "tool_calls": tool_calls_log,
             }
 
+        # Выполняем каждый вызов инструмента
         for tc in tool_calls:
             fn_name     = tc["function"]["name"]
             fn_args_raw = tc["function"].get("arguments", "{}")
@@ -377,7 +410,15 @@ def run_agent(data_path: str, user_context: str, api_key: str = None, model_name
                 })
                 continue
 
+            print(f"[agent] ▶ Выполняем код ({len(code)} симв.) ...")
             exec_result = execute_python_code(code, data_path)
+            print(f"[agent] ◀ returncode={exec_result['returncode']} | "
+                  f"stdout={len(exec_result['stdout'])}б | "
+                  f"stderr={len(exec_result['stderr'])}б | "
+                  f"figures={len(exec_result['figures'])}")
+            if exec_result["stderr"]:
+                print(f"[agent] STDERR: {exec_result['stderr'][:300]}")
+
             all_figures.extend(exec_result["figures"])
             tool_calls_log.append({
                 "code":          code,
@@ -403,6 +444,8 @@ def run_agent(data_path: str, user_context: str, api_key: str = None, model_name
                 "content":      tool_output,
             })
 
+    # Лимит итераций — возвращаем всё накопленное + последний текст ассистента
+    print(f"[agent] ⚠ Лимит итераций. figures={len(all_figures)} last_text={len(last_text)}б")
     return {
         "report":     last_text or "Агент завершил работу (достигнут лимит итераций).",
         "figures":    all_figures,
@@ -414,7 +457,7 @@ def run_agent(data_path: str, user_context: str, api_key: str = None, model_name
 
 @app.route('/config', methods=['GET'])
 def get_config():
-    """Возвращает текущую модель по умолчанию, прописанную в коде бэкенда."""
+    """Возвращает текущую модель по умолчанию, прописанную в коде бекенда."""
     return jsonify({"default_model": MODEL})
 
 @app.route('/')
@@ -444,10 +487,6 @@ def analyze():
 
     file         = request.files['file']
     user_context = request.form.get('context', '').strip()
-    
-    # Считываем переданные пользователем кастомную модель и ключ из FormData
-    user_api_key = request.form.get('api_key', '').strip()
-    user_model   = request.form.get('model', '').strip()
 
     if file.filename == '':
         return jsonify({"error": "Файл не выбран"}), 400
@@ -468,13 +507,7 @@ def analyze():
     file.save(file_path)
 
     try:
-        # Прокидываем в ранер агента кастомную модель и ключ
-        result = run_agent(
-            os.path.abspath(file_path), 
-            user_context, 
-            api_key=user_api_key, 
-            model_name=user_model
-        )
+        result = run_agent(os.path.abspath(file_path), user_context)
         return jsonify({
             "report":           result["report"],
             "figures":          result["figures"],

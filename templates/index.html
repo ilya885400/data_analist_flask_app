@@ -3,24 +3,23 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>DataMind — AI Аналитик данных</title>
+<title>[DataMind] // AI Data Analyst Terminal</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg: #0a0a0f;
-    --surface: #111118;
-    --surface2: #1a1a24;
-    --border: #2a2a3a;
-    --accent: #6c63ff;
-    --accent2: #ff6584;
-    --accent3: #43e97b;
-    --text: #e8e8f0;
-    --text-muted: #6b6b80;
-    --text-dim: #3a3a50;
+    --bg: #050805;
+    --surface: #0a0f0a;
+    --surface2: #101810;
+    --border: #1f3a1f;
+    --border-focus: #39ff14;
+    --accent: #39ff14; /* Matrix Neon Green */
+    --accent-dim: #1a800a;
+    --accent-warn: #ff3333;
+    --text: #c0dec0;
+    --text-muted: #558855;
+    --text-dim: #2d4a2d;
     --mono: 'JetBrains Mono', monospace;
-    --sans: 'Syne', sans-serif;
-    --body: 'Inter', sans-serif;
   }
 
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -28,20 +27,20 @@
   body {
     background: var(--bg);
     color: var(--text);
-    font-family: var(--body);
+    font-family: var(--mono);
     min-height: 100vh;
     overflow-x: hidden;
+    padding-bottom: 60px;
   }
 
-  /* ── Grid Background ── */
   body::before {
     content: '';
     position: fixed;
     inset: 0;
     background-image:
-      linear-gradient(rgba(108,99,255,.03) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(108,99,255,.03) 1px, transparent 1px);
-    background-size: 40px 40px;
+      linear-gradient(rgba(57, 255, 20, 0.02) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(57, 255, 20, 0.02) 1px, transparent 1px);
+    background-size: 30px 30px;
     pointer-events: none;
     z-index: 0;
   }
@@ -49,564 +48,456 @@
   .glow {
     position: fixed;
     border-radius: 50%;
-    filter: blur(120px);
+    filter: blur(140px);
     pointer-events: none;
     z-index: 0;
   }
-  .glow-1 { width: 500px; height: 500px; background: rgba(108,99,255,.12); top: -100px; left: -100px; }
-  .glow-2 { width: 400px; height: 400px; background: rgba(255,101,132,.08); bottom: -100px; right: -50px; }
-  .glow-3 { width: 300px; height: 300px; background: rgba(67,233,123,.06); top: 40%; left: 50%; }
+  .glow-1 { width: 400px; height: 400px; background: rgba(57, 255, 20, 0.05); top: -100px; left: -100px; }
+  .glow-2 { width: 500px; height: 500px; background: rgba(26, 128, 10, 0.03); bottom: -100px; right: -50px; }
 
   .container {
     position: relative;
     z-index: 1;
-    max-width: 900px;
+    max-width: 950px;
     margin: 0 auto;
-    padding: 0 24px 80px;
+    padding: 0 24px;
   }
 
-  /* ── Header ── */
   header {
-    padding: 48px 0 60px;
-    text-align: center;
+    padding: 40px 0 30px;
+    border-bottom: 1px dashed var(--border);
+    margin-bottom: 30px;
   }
 
   .badge {
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    background: rgba(108,99,255,.1);
-    border: 1px solid rgba(108,99,255,.3);
-    border-radius: 100px;
-    padding: 6px 16px;
-    font-family: var(--mono);
+    background: rgba(57, 255, 20, 0.05);
+    border: 1px solid var(--border);
+    padding: 4px 12px;
     font-size: 11px;
     color: var(--accent);
-    letter-spacing: .08em;
     text-transform: uppercase;
-    margin-bottom: 28px;
+    margin-bottom: 16px;
   }
 
   .badge::before {
     content: '';
     width: 6px; height: 6px;
-    background: var(--accent3);
+    background: var(--accent);
     border-radius: 50%;
-    animation: pulse 2s ease-in-out infinite;
+    box-shadow: 0 0 8px var(--accent);
+    animation: pulse 1.5s ease-in-out infinite;
   }
 
   @keyframes pulse {
-    0%, 100% { opacity: 1; transform: scale(1); }
-    50% { opacity: .5; transform: scale(.8); }
+    0%, 100% { opacity: 1; }
+    50% { opacity: .3; }
   }
 
   h1 {
-    font-family: var(--sans);
-    font-size: clamp(42px, 8vw, 72px);
-    font-weight: 800;
-    letter-spacing: -.03em;
-    line-height: 1;
-    margin-bottom: 16px;
-  }
-
-  h1 span.grad {
-    background: linear-gradient(135deg, #6c63ff 0%, #ff6584 50%, #43e97b 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    font-size: clamp(32px, 6vw, 54px);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    line-height: 1.1;
+    color: #fff;
+    text-shadow: 0 0 10px rgba(57, 255, 20, 0.3);
+    margin-bottom: 12px;
   }
 
   .subtitle {
-    font-size: 16px;
+    font-size: 13px;
     color: var(--text-muted);
-    max-width: 480px;
-    margin: 0 auto;
+    max-width: 600px;
     line-height: 1.6;
-    font-weight: 300;
   }
 
-  /* ── Card ── */
+  .config-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 16px;
+  }
+  @media (max-width: 650px) {
+    .config-grid { grid-template-columns: 1fr; }
+  }
+
   .card {
     background: var(--surface);
     border: 1px solid var(--border);
-    border-radius: 20px;
-    padding: 32px;
-    margin-bottom: 24px;
+    padding: 24px;
+    margin-bottom: 20px;
     position: relative;
-    overflow: hidden;
   }
 
   .card::before {
-    content: '';
+    content: '::';
     position: absolute;
-    top: 0; left: 0; right: 0;
-    height: 1px;
-    background: linear-gradient(90deg, transparent, rgba(108,99,255,.5), transparent);
+    top: 4px;
+    left: 8px;
+    font-size: 10px;
+    color: var(--text-dim);
   }
 
   .card-label {
-    font-family: var(--mono);
-    font-size: 10px;
-    letter-spacing: .12em;
+    font-size: 11px;
+    font-weight: 700;
     text-transform: uppercase;
-    color: var(--text-dim);
-    margin-bottom: 20px;
+    color: var(--accent);
+    margin-bottom: 16px;
     display: flex;
     align-items: center;
     gap: 10px;
   }
 
-  .card-label::after {
-    content: '';
-    flex: 1;
-    height: 1px;
-    background: var(--border);
+  .input-field {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    padding: 12px;
+    color: var(--text);
+    font-family: var(--mono);
+    font-size: 13px;
+    outline: none;
+    transition: all .2s;
+  }
+  .input-field:focus {
+    border-color: var(--border-focus);
+    box-shadow: 0 0 8px rgba(57, 255, 20, 0.15);
+  }
+  .input-field::placeholder { color: var(--text-dim); }
+
+  .context-area {
+    min-height: 100px;
+    resize: vertical;
   }
 
-  /* ── Drop Zone ── */
+  .hint {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-top: 6px;
+    display: block;
+  }
+
   .drop-zone {
-    border: 2px dashed var(--border);
-    border-radius: 14px;
-    padding: 52px 24px;
+    border: 1px dashed var(--border);
+    background: var(--surface2);
+    padding: 40px 20px;
     text-align: center;
     cursor: pointer;
-    transition: all .3s ease;
-    background: var(--surface2);
-    position: relative;
+    transition: all .2s;
   }
 
   .drop-zone:hover, .drop-zone.dragover {
     border-color: var(--accent);
-    background: rgba(108,99,255,.05);
-    transform: translateY(-2px);
+    background: rgba(57, 255, 20, 0.02);
   }
 
   .drop-zone.has-file {
-    border-color: var(--accent3);
-    background: rgba(67,233,123,.03);
-  }
-
-  .drop-icon {
-    width: 52px; height: 52px;
-    margin: 0 auto 16px;
-    background: rgba(108,99,255,.1);
-    border: 1px solid rgba(108,99,255,.2);
-    border-radius: 14px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 24px;
-    transition: all .3s;
-  }
-
-  .drop-zone:hover .drop-icon {
-    background: rgba(108,99,255,.2);
-    transform: scale(1.05);
-  }
-
-  .drop-zone.has-file .drop-icon {
-    background: rgba(67,233,123,.1);
-    border-color: rgba(67,233,123,.3);
+    border-color: var(--accent);
+    background: rgba(57, 255, 20, 0.04);
   }
 
   .drop-title {
-    font-family: var(--sans);
-    font-size: 16px;
-    font-weight: 600;
-    margin-bottom: 6px;
-  }
-
-  .drop-hint {
-    font-size: 13px;
-    color: var(--text-muted);
+    font-size: 14px;
+    font-weight: 500;
+    margin-bottom: 8px;
   }
 
   .file-types {
     display: flex;
-    gap: 8px;
+    gap: 6px;
     justify-content: center;
-    margin-top: 16px;
+    margin-top: 12px;
     flex-wrap: wrap;
   }
 
   .chip {
-    font-family: var(--mono);
     font-size: 10px;
-    padding: 3px 10px;
+    padding: 2px 8px;
     border: 1px solid var(--border);
-    border-radius: 100px;
     color: var(--text-muted);
+  }
+  .drop-zone.has-file .chip {
+    border-color: var(--accent-dim);
+    color: var(--accent);
   }
 
   #fileInput { display: none; }
 
-  /* ── Textarea ── */
-  .context-area {
-    width: 100%;
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 16px;
-    color: var(--text);
-    font-family: var(--body);
-    font-size: 14px;
-    line-height: 1.6;
-    resize: vertical;
-    min-height: 110px;
-    transition: border-color .2s;
-    outline: none;
-  }
-
-  .context-area::placeholder { color: var(--text-dim); }
-  .context-area:focus { border-color: rgba(108,99,255,.5); }
-
-  .context-hint {
-    font-size: 12px;
-    color: var(--text-dim);
-    margin-top: 8px;
-    font-family: var(--mono);
-  }
-
-  /* ── Button ── */
   .btn-analyze {
     width: 100%;
-    padding: 18px;
-    background: linear-gradient(135deg, #6c63ff, #9b59ff);
-    border: none;
-    border-radius: 14px;
-    color: #fff;
-    font-family: var(--sans);
-    font-size: 16px;
+    padding: 16px;
+    background: transparent;
+    border: 1px solid var(--accent);
+    color: var(--accent);
+    font-family: var(--mono);
+    font-size: 14px;
     font-weight: 700;
-    letter-spacing: .02em;
+    text-transform: uppercase;
     cursor: pointer;
-    transition: all .3s;
-    position: relative;
-    overflow: hidden;
-    margin-top: 8px;
+    transition: all .2s;
+    box-shadow: 0 0 10px rgba(57, 255, 20, 0.05);
   }
 
   .btn-analyze:hover:not(:disabled) {
-    transform: translateY(-2px);
-    box-shadow: 0 20px 40px rgba(108,99,255,.3);
+    background: var(--accent);
+    color: var(--bg);
+    box-shadow: 0 0 15px rgba(57, 255, 20, 0.4);
   }
 
   .btn-analyze:disabled {
-    opacity: .5;
+    opacity: .3;
+    border-color: var(--border);
+    color: var(--text-muted);
     cursor: not-allowed;
-    transform: none;
   }
 
-  .btn-analyze::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(135deg, rgba(255,255,255,.1), transparent);
-  }
-
-  /* ── Progress ── */
-  .progress-section {
-    display: none;
-    margin-bottom: 24px;
-  }
-
+  .progress-section { display: none; }
   .progress-section.visible { display: block; }
 
   .progress-bar-wrap {
     background: var(--surface2);
-    border-radius: 100px;
-    height: 4px;
+    border: 1px solid var(--border);
+    height: 6px;
     overflow: hidden;
     margin-bottom: 16px;
   }
 
   .progress-bar {
     height: 100%;
-    background: linear-gradient(90deg, #6c63ff, #ff6584, #43e97b);
-    background-size: 200% 100%;
-    animation: shimmer 2s linear infinite;
-    border-radius: 100px;
+    background: var(--accent);
+    box-shadow: 0 0 8px var(--accent);
     width: 0%;
-    transition: width .5s ease;
-  }
-
-  @keyframes shimmer {
-    0% { background-position: 200% 0; }
-    100% { background-position: -200% 0; }
+    transition: width .4s ease;
   }
 
   .progress-steps {
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 8px;
   }
 
   .step {
     display: flex;
     align-items: center;
     gap: 12px;
-    font-size: 13px;
-    color: var(--text-muted);
-    transition: color .3s;
+    font-size: 12px;
+    color: var(--text-dim);
   }
 
-  .step.active { color: var(--text); }
-  .step.done { color: var(--accent3); }
+  .step.active { color: var(--accent); }
+  .step.done { color: var(--text-muted); }
 
-  .step-icon {
-    width: 24px; height: 24px;
-    border-radius: 50%;
-    border: 1px solid var(--border);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 11px;
-    flex-shrink: 0;
-    transition: all .3s;
-  }
+  .step-icon { flex-shrink: 0; }
 
-  .step.active .step-icon {
-    border-color: var(--accent);
-    background: rgba(108,99,255,.1);
-    animation: spin 1s linear infinite;
-  }
-
-  .step.done .step-icon {
-    border-color: var(--accent3);
-    background: rgba(67,233,123,.1);
-    color: var(--accent3);
-  }
-
-  @keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-  }
-
-  /* ── Results ── */
   .results-section { display: none; }
   .results-section.visible { display: block; }
 
   .stats-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-    gap: 16px;
-    margin-bottom: 24px;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 12px;
   }
 
   .stat-card {
     background: var(--surface2);
     border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 20px 16px;
+    padding: 16px;
     text-align: center;
   }
 
   .stat-value {
-    font-family: var(--mono);
-    font-size: 28px;
-    font-weight: 500;
-    color: var(--accent);
+    font-size: 24px;
+    font-weight: 700;
+    color: #fff;
     margin-bottom: 4px;
   }
 
   .stat-label {
-    font-size: 11px;
+    font-size: 10px;
     color: var(--text-muted);
     text-transform: uppercase;
-    letter-spacing: .08em;
-    font-family: var(--mono);
   }
 
-  /* ── Figures ── */
   .figures-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
     gap: 16px;
-    margin-bottom: 24px;
+  }
+  @media (max-width: 450px) {
+    .figures-grid { grid-template-columns: 1fr; }
   }
 
   .figure-card {
     background: var(--surface2);
     border: 1px solid var(--border);
-    border-radius: 14px;
-    overflow: hidden;
+    padding: 6px;
   }
 
   .figure-card img {
     width: 100%;
     display: block;
+    filter: hue-rotate(45deg) brightness(0.95);
   }
 
   .figure-label {
-    padding: 10px 16px;
-    font-family: var(--mono);
-    font-size: 11px;
-    color: var(--text-dim);
-    border-top: 1px solid var(--border);
+    padding: 6px 4px 2px;
+    font-size: 10px;
+    color: var(--text-muted);
+    border-top: 1px dashed var(--border);
+    margin-top: 6px;
   }
 
-  /* ── Report ── */
   .report-content {
     background: var(--surface2);
     border: 1px solid var(--border);
-    border-radius: 14px;
-    padding: 28px;
-    line-height: 1.8;
-    font-size: 14.5px;
+    padding: 20px;
+    font-size: 13px;
+    line-height: 1.6;
     white-space: pre-wrap;
     word-break: break-word;
+    color: #d0ebd0;
   }
 
-  .report-content h2, .report-content h3 {
-    font-family: var(--sans);
-    color: var(--accent);
-    margin: 24px 0 12px;
-  }
-
-  /* ── Error ── */
   .error-box {
-    background: rgba(255,101,132,.05);
-    border: 1px solid rgba(255,101,132,.2);
-    border-radius: 12px;
-    padding: 16px 20px;
-    color: #ff6584;
-    font-size: 14px;
-    display: none;
-  }
-
-  .error-box.visible { display: block; }
-
-  /* ── Security badge ── */
-  .security-note {
-    display: flex;
-    align-items: center;
-    gap: 10px;
+    background: rgba(255, 51, 51, 0.05);
+    border: 1px solid var(--accent-warn);
+    padding: 14px;
+    color: var(--accent-warn);
     font-size: 12px;
-    color: var(--text-dim);
+    display: none;
     margin-top: 16px;
-    font-family: var(--mono);
   }
-
-  .security-note::before {
-    content: '🔒';
-    font-size: 14px;
-  }
+  .error-box.visible { display: block; }
 
   footer {
     text-align: center;
-    padding: 32px 0 0;
-    font-family: var(--mono);
-    font-size: 11px;
+    margin-top: 40px;
+    font-size: 10px;
     color: var(--text-dim);
+    border-top: 1px dashed var(--border);
+    padding-top: 20px;
   }
 </style>
 </head>
 <body>
 <div class="glow glow-1"></div>
 <div class="glow glow-2"></div>
-<div class="glow glow-3"></div>
 
 <div class="container">
   <header>
-    <div class="badge">AI-powered analytics</div>
-    <h1>Data<span class="grad">Mind</span></h1>
-    <p class="subtitle">Загрузите любой датасет — агент на базе LLM проведёт полный анализ, построит графики и найдёт инсайты</p>
+    <div class="badge">system_status: operational</div>
+    <h1>DATAMIND // DATA_ANALYSIS_AGENT</h1>
+    <p class="subtitle">>_ Загрузите массив данных. ИИ-агент развернет изолированную песочницу Docker, выполнит итеративный анализ кода, сгенерирует графики и сформирует полный аудит-отчет.</p>
   </header>
 
-  <!-- Upload Card -->
   <div class="card">
-    <div class="card-label">01 — загрузка датасета</div>
+    <div class="card-label">[01] конфигурация окружения / openrouter api</div>
+    <div class="config-grid">
+      <div>
+        <input type="password" id="apiKeyInput" class="input-field" placeholder="Укажите ваш sk_or_... (Оставьте пустым для ключа сервера)">
+        <span class="hint">OpenRouter API Key (не сохраняется на сервере)</span>
+      </div>
+      <div>
+        <input type="text" id="modelInput" class="input-field" list="popular-models" placeholder="Загрузка дефолтной модели...">
+        <datalist id="popular-models">
+          <option value="poolside/laguna-xs.2:free">
+          <option value="qwen/qwen-2.5-72b-instruct:free">
+          <option value="meta-llama/llama-3.3-70b-instruct:free">
+          <option value="deepseek/deepseek-chat">
+          <option value="microsoft/wizardlm-2-8x22b:free">
+        </datalist>
+        <span class="hint">Идентификатор LLM-модели OpenRouter</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-label">[02] загрузка целевого объекта</div>
     <div class="drop-zone" id="dropZone" onclick="document.getElementById('fileInput').click()">
-      <div class="drop-icon" id="dropIcon">📊</div>
-      <div class="drop-title" id="dropTitle">Перетащите файл или нажмите для выбора</div>
-      <div class="drop-hint" id="dropHint">Поддерживаются CSV, Excel, TSV, JSON</div>
+      <div class="drop-title" id="dropTitle">>> ПЕРЕТАЩИТЕ СТРУКТУРИРОВАННЫЙ ФАЙЛ СЮДА ИЛИ НАЖМИТЕ ДЛЯ ОБЗОРA</div>
       <div class="file-types">
-        <span class="chip">.csv</span>
-        <span class="chip">.xlsx</span>
-        <span class="chip">.xls</span>
-        <span class="chip">.tsv</span>
-        <span class="chip">.json</span>
+        <span class="chip">*.csv</span>
+        <span class="chip">*.xlsx</span>
+        <span class="chip">*.xls</span>
+        <span class="chip">*.tsv</span>
+        <span class="chip">*.json</span>
       </div>
     </div>
     <input type="file" id="fileInput" accept=".csv,.xlsx,.xls,.tsv,.json">
   </div>
 
-  <!-- Context Card -->
   <div class="card">
-    <div class="card-label">02 — контекст и инструкции</div>
-    <textarea
-      id="contextInput"
-      class="context-area"
-      placeholder="Например: «Это данные о продажах за 2024 год. Обрати внимание на сезонность, выяви топ-продукты и регионы с падением выручки. Какие факторы коррелируют с высокими продажами?»"
-      maxlength="3000"
-    ></textarea>
-    <div class="context-hint">Необязательно · макс. 3000 символов · <span id="charCount">0</span>/3000</div>
-    <div class="security-note">Защита от prompt injection активна — попытки манипуляции блокируются</div>
+    <div class="card-label">[03] фокус и контекст исследования</div>
+    <textarea id="contextInput" class="input-field context-area" placeholder="Укажите приоритеты анализа..." maxlength="3000"></textarea>
+    <div style="display:flex; justify-content:space-between; margin-top:6px;">
+      <span class="hint">Анти-инъекционный фильтр активен.</span>
+      <span class="hint"><span id="charCount">0</span> / 3000cc</span>
+    </div>
   </div>
 
-  <!-- Action -->
   <button class="btn-analyze" id="analyzeBtn" disabled onclick="startAnalysis()">
-    Запустить AI-анализ →
+    [ Инициализировать контур анализа ]
   </button>
 
-  <!-- Error -->
   <div class="error-box" id="errorBox"></div>
 
-  <!-- Progress -->
   <div class="progress-section card" id="progressSection">
-    <div class="card-label">агент работает</div>
+    <div class="card-label">[status] агент разворачивает контейнеры выполнения</div>
     <div class="progress-bar-wrap">
       <div class="progress-bar" id="progressBar"></div>
     </div>
     <div class="progress-steps" id="progressSteps">
-      <div class="step" id="step1" data-label="Загрузка и первичный осмотр датасета">
-        <div class="step-icon">◌</div><span>Загрузка и первичный осмотр датасета</span>
-      </div>
-      <div class="step" id="step2" data-label="Вычисление статистик и метрик">
-        <div class="step-icon">◌</div><span>Вычисление статистик и метрик</span>
-      </div>
-      <div class="step" id="step3" data-label="Построение графиков">
-        <div class="step-icon">◌</div><span>Построение графиков</span>
-      </div>
-      <div class="step" id="step4" data-label="Анализ аномалий и корреляций">
-        <div class="step-icon">◌</div><span>Анализ аномалий и корреляций</span>
-      </div>
-      <div class="step" id="step5" data-label="Формирование отчёта и инсайтов">
-        <div class="step-icon">◌</div><span>Формирование отчёта и инсайтов</span>
-      </div>
+      <div class="step" id="step1"><span class="step-icon">[.]</span><span>Чтение структуры датасета и инспекция типов данных...</span></div>
+      <div class="step" id="step2"><span class="step-icon">[.]</span><span>Генерация скриптов первичной описательной статистики...</span></div>
+      <div class="step" id="step3"><span class="step-icon">[.]</span><span>Построение распределений и разведочный анализ (EDA)...</span></div>
+      <div class="step" id="step4"><span class="step-icon">[.]</span><span>Вычисление корреляционных матриц и поиск аномалий...</span></div>
+      <div class="step" id="step5"><span class="step-icon">[.]</span><span>Синтез финального аналитического отчета...</span></div>
     </div>
   </div>
 
-  <!-- Results -->
   <div class="results-section" id="resultsSection">
     <div class="card">
-      <div class="card-label">сводка</div>
+      <div class="card-label">[summary] телеметрия прогона</div>
       <div class="stats-grid" id="statsGrid"></div>
     </div>
-
     <div class="card" id="figuresCard" style="display:none">
-      <div class="card-label">графики</div>
+      <div class="card-label">[visuals] визуализация данных (matplotlib / seaborn)</div>
       <div class="figures-grid" id="figuresGrid"></div>
     </div>
-
     <div class="card">
-      <div class="card-label">полный отчёт агента</div>
+      <div class="card-label">[report] выходной аудит-отчет агента</div>
       <div class="report-content" id="reportContent"></div>
     </div>
   </div>
 
-  <footer>DataMind · LLM Analytics Agent · Claude API</footer>
+  <footer>DATAMIND v2.2 // SANDBOX STATUS: SECURE</footer>
 </div>
 
 <script>
 let selectedFile = null;
+let stepTimer = null;
 
-// ── File handling ────────────────────────────────────────────────────────────
+// Запрос дефолтной модели с сервера при инициализации страницы
+window.addEventListener('DOMContentLoaded', () => {
+  fetch('/config')
+    .then(r => r.json())
+    .then(data => {
+      if (data.default_model) {
+        document.getElementById('modelInput').value = data.default_model;
+      }
+    })
+    .catch(() => {
+      document.getElementById('modelInput').placeholder = "poolside/laguna-xs.2:free";
+    });
+});
+
 const dropZone = document.getElementById('dropZone');
 const fileInput = document.getElementById('fileInput');
 
 fileInput.addEventListener('change', (e) => handleFile(e.target.files[0]));
-
 dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.classList.add('dragover'); });
 dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
 dropZone.addEventListener('drop', (e) => {
@@ -620,26 +511,19 @@ function handleFile(file) {
   const allowed = ['.csv', '.xlsx', '.xls', '.tsv', '.json'];
   const ext = '.' + file.name.split('.').pop().toLowerCase();
   if (!allowed.includes(ext)) {
-    showError('Неподдерживаемый формат файла. Используйте: ' + allowed.join(', '));
+    showError('FILE_TYPE_REJECTED: Допустимы только ' + allowed.join(', '));
     return;
   }
   selectedFile = file;
   dropZone.classList.add('has-file');
-  document.getElementById('dropIcon').textContent = '✅';
-  document.getElementById('dropTitle').textContent = file.name;
-  document.getElementById('dropHint').textContent = `${(file.size / 1024).toFixed(1)} KB · нажмите для замены`;
+  document.getElementById('dropTitle').textContent = `READY // CODE_NAME: ${file.name} (${(file.size / 1024).toFixed(1)} KB)`;
   document.getElementById('analyzeBtn').disabled = false;
   hideError();
 }
 
-// ── Char counter ─────────────────────────────────────────────────────────────
 document.getElementById('contextInput').addEventListener('input', function() {
   document.getElementById('charCount').textContent = this.value.length;
 });
-
-// ── Analysis ─────────────────────────────────────────────────────────────────
-let stepTimer = null;
-let currentStep = 0;
 
 function startAnalysis() {
   if (!selectedFile) return;
@@ -655,6 +539,8 @@ function startAnalysis() {
   const formData = new FormData();
   formData.append('file', selectedFile);
   formData.append('context', document.getElementById('contextInput').value);
+  formData.append('api_key', document.getElementById('apiKeyInput').value);
+  formData.append('model', document.getElementById('modelInput').value);
 
   fetch('/analyze', { method: 'POST', body: formData })
     .then(r => r.json())
@@ -672,33 +558,30 @@ function startAnalysis() {
     })
     .catch(err => {
       clearInterval(stepTimer);
-      showError('Сетевая ошибка: ' + err.message);
+      showError('NETWORK_CRITICAL_FAILURE: ' + err.message);
       document.getElementById('progressSection').classList.remove('visible');
       document.getElementById('analyzeBtn').disabled = false;
     });
 }
 
 function resetSteps() {
-  currentStep = 0;
-  document.getElementById('progressBar').style.width = '5%';
+  document.getElementById('progressBar').style.width = '3%';
   ['step1','step2','step3','step4','step5'].forEach(id => {
     const el = document.getElementById(id);
-    el.classList.remove('active','done');
-    el.querySelector('.step-icon').textContent = '◌';
+    el.className = 'step';
+    el.querySelector('.step-icon').textContent = '[.]';
   });
 }
 
 function animateSteps() {
   const steps = ['step1','step2','step3','step4','step5'];
-  const durations = [8000, 15000, 20000, 30000, 45000];
-  let elapsed = 0;
-
+  
   function activateStep(i) {
     if (i >= steps.length) return;
     const el = document.getElementById(steps[i]);
-    el.classList.add('active');
-    el.querySelector('.step-icon').textContent = '↺';
-    const progress = 10 + (i / steps.length) * 75;
+    el.className = 'step active';
+    el.querySelector('.step-icon').textContent = '[▶]';
+    const progress = 10 + (i / steps.length) * 80;
     document.getElementById('progressBar').style.width = progress + '%';
   }
 
@@ -707,29 +590,26 @@ function animateSteps() {
   stepTimer = setInterval(() => {
     if (i < steps.length) {
       const prev = document.getElementById(steps[i-1]);
-      prev.classList.remove('active');
-      prev.classList.add('done');
-      prev.querySelector('.step-icon').textContent = '✓';
+      prev.className = 'step done';
+      prev.querySelector('.step-icon').textContent = '[✓]';
       activateStep(i);
       i++;
     }
-  }, 12000);
+  }, 9000);
 }
 
 function completeAllSteps() {
   document.getElementById('progressBar').style.width = '100%';
   ['step1','step2','step3','step4','step5'].forEach(id => {
     const el = document.getElementById(id);
-    el.classList.remove('active');
-    el.classList.add('done');
-    el.querySelector('.step-icon').textContent = '✓';
+    el.className = 'step done';
+    el.querySelector('.step-icon').textContent = '[✓]';
   });
 }
 
 function showResults(data) {
   document.getElementById('progressSection').classList.remove('visible');
 
-  // Stats
   const statsGrid = document.getElementById('statsGrid');
   const toolCalls = data.tool_calls_count || 0;
   const figures = data.figures || [];
@@ -738,19 +618,18 @@ function showResults(data) {
   statsGrid.innerHTML = `
     <div class="stat-card">
       <div class="stat-value">${toolCalls}</div>
-      <div class="stat-label">вызовов кода</div>
+      <div class="stat-label">docker_exec_loops</div>
     </div>
     <div class="stat-card">
       <div class="stat-value">${figures.length}</div>
-      <div class="stat-label">графиков</div>
+      <div class="stat-label">plots_rendered</div>
     </div>
     <div class="stat-card">
       <div class="stat-value">${(reportLen / 1000).toFixed(1)}K</div>
-      <div class="stat-label">символов отчёта</div>
+      <div class="stat-label">buffer_bytes</div>
     </div>
   `;
 
-  // Figures
   if (figures.length > 0) {
     const figCard = document.getElementById('figuresCard');
     figCard.style.display = 'block';
@@ -760,14 +639,15 @@ function showResults(data) {
       const div = document.createElement('div');
       div.className = 'figure-card';
       div.innerHTML = `
-        <img src="data:image/png;base64,${b64}" alt="График ${i+1}" loading="lazy">
-        <div class="figure-label">Рис. ${i+1}</div>
+        <img src="data:image/png;base64,${b64}" alt="Plot ${i+1}" loading="lazy">
+        <div class="figure-label">sector_0${i+1}_render.png</div>
       `;
       grid.appendChild(div);
     });
+  } else {
+    document.getElementById('figuresCard').style.display = 'none';
   }
 
-  // Report
   document.getElementById('reportContent').textContent = data.report || '';
 
   const section = document.getElementById('resultsSection');
@@ -777,7 +657,7 @@ function showResults(data) {
 
 function showError(msg) {
   const box = document.getElementById('errorBox');
-  box.textContent = '⚠️ ' + msg;
+  box.textContent = '>> [FATAL_ERR] ' + msg;
   box.classList.add('visible');
 }
 
