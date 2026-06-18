@@ -7,8 +7,6 @@
 
 > DataMind — это интерактивный ИИ-агент для автоматизированного разведочного анализа данных (EDA). Агент разворачивает изолированную песочницу Docker, генерирует итеративный Python-код для обработки массивов данных, строит графики с помощью matplotlib/seaborn и компилирует детальный аналитический аудит-отчет.
 
-Интерфейс выполнен в кастомном киберпанк / хакерском (Matrix Neon Green) стиле со скрин-эффектами и динамическими терминальными логами выполнения.
-
 ---
 
 ## Ключевые возможности
@@ -39,8 +37,8 @@
 
 ### 2. Клонирование и установка зависимостей
 ```bash
-git clone [https://github.com/yourusername/datamind.git](https://github.com/yourusername/datamind.git)
-cd datamind
+git clone https://github.com/ilya885400/data_analist_flask_app
+cd data_analist_flask_app
 pip install -r requirements.txt
 
 ```
