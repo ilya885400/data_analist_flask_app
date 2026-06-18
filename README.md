@@ -1,100 +1,43 @@
-# DataMind — AI Аналитик данных
+# ⚡ DataMind // AI Data Analyst Terminal
 
-Веб-приложение для агентного анализа датасетов. LLM (через OpenRouter) **сама пишет и выполняет Python-код** в изолированном Docker-контейнере через tool-use / function-calling loop.
+[![System Status](https://img.shields.io/badge/system__status-operational-39ff14?style=flat-mono&logo=matrix)](https://github.com/)
+[![Docker](https://img.shields.io/badge/sandbox-isolated_docker-blue?style=flat-mono&logo=docker)](https://www.docker.com/)
+[![Python](https://img.shields.io/badge/backend-python_3.11_/_flask-green?style=flat-mono&logo=python)](https://www.python.org/)
 
-## Стек
+> **`DATAMIND`** — это интерактивный ИИ-агент для автоматизированного разведочного анализа данных (EDA). Агент разворачивает изолированную песочницу Docker, генерирует итеративный Python-код для обработки массивов данных, строит графики с помощью `matplotlib`/`seaborn` и компилирует детальный аналитический аудит-отчет.
 
-| Слой | Технология |
-|------|-----------|
-| Веб-интерфейс | Flask + HTML/CSS/JS |
-| LLM | OpenRouter API → `inclusionai/ring-2.6-1t:free` |
-| Tool-use loop | OpenAI-совместимый `function_calling` |
-| Выполнение кода | Docker (`datamind-sandbox`) — изолированный контейнер |
-| Данные | pandas, numpy, matplotlib, seaborn, scipy |
+Интерфейс выполнен в кастомном **киберпанк / хакерском (Matrix Neon Green)** стиле со скрин-эффектами и динамическими терминальными логами выполнения.
 
-## Архитектура
+---
 
-```
-Браузер → Flask → check_injection()
-                       │
-                       ▼
-               run_agent() — agentic loop
-               ┌──────────────────────────┐
-               │  OpenRouter API          │
-               │  (function_calling)      │
-               │         │                │
-               │  execute_code tool       │
-               │         │                │
-               │  Docker container        │
-               │  --network none          │
-               │  --read-only             │
-               │  --memory 512m           │
-               │  --cap-drop ALL          │
-               └──────────────────────────┘
-                       │
-               figures (base64 PNG) + report
-```
+## 🦾 Ключевые возможности
 
-## Требования
+* **Изолированная Docker-песочница:** Весь сгенерированный нейросетью код исполняется внутри защищенного контейнера с ограничением памяти (512MB), процессора и без доступа к сети.
+* **Динамическая конфигурация LLM:** Возможность «на лету» указать собственный API-ключ OpenRouter и абсолютно любую текстовую модель (например, `deepseek/deepseek-chat`, `qwen/qwen-2.5-72b-instruct:free`, `meta-llama/llama-3.3-70b-instruct:free`).
+* **Инъекционная безопасность:** Встроенная валидация контекста пользователя на популярные паттерны Jailbreak и Prompt Injection.
+* **Визуализация аномалий и трендов:** Автоматический перехват графиков `plt.show()` из контейнера и их рендеринг в веб-интерфейсе в реальном времени.
+* **Терминальный логгер прогона:** Пошаговое отслеживание итераций агента (чтение типов, вычисление корреляций, генерация инсайтов).
 
-- Python 3.10+
-- **Docker** (установлен и запущен: `docker info`)
-- Аккаунт на [openrouter.ai](https://openrouter.ai) (бесплатный)
+---
 
-## Установка
+## 🛠 Стек технологий
 
+* **Backend:** Python 3.11, Flask, Requests, Docker SDK / CLI Automation
+* **Sandbox (Docker):** `pandas`, `numpy`, `matplotlib`, `seaborn`, `scipy`, `openpyxl`, `xlrd` (образ `datamind-sandbox`)
+* **Frontend:** Ванильный HTML5 / CSS3 (JetBrains Mono, CSS Grid, Custom Matrix Glow, Fluid Layout), JavaScript (Fetch API)
+* **Core Orchestration:** OpenRouter API (Инструменты / Function Calling loop)
+
+---
+
+## 🚀 Быстрый старт
+
+### 1. Требования
+На хост-машине должны быть установлены:
+* Python 3.11+
+* Docker (убедитесь, что демону Docker разрешено выполнять команды без sudo, либо запустите скрипт из-под нужного пользователя).
+
+### 2. Клонирование и установка зависимостей
 ```bash
-git clone <repo>
-cd data_analyst_app
-python -m venv venv && source venv/bin/activate
+git clone [https://github.com/yourusername/datamind.git](https://github.com/yourusername/datamind.git)
+cd datamind
 pip install -r requirements.txt
-```
-
-## Конфигурация
-
-```bash
-export OPENROUTER_API_KEY="sk-or-v1-..."
-```
-
-Получить ключ: https://openrouter.ai/keys (бесплатно)
-
-## Запуск
-
-```bash
-python app.py
-```
-
-При первом запуске автоматически собирается Docker-образ `datamind-sandbox:latest`
-с нужными библиотеками (~30 сек, только один раз).
-
-Открыть: **http://localhost:5000**
-
-## Проверка окружения
-
-```bash
-curl http://localhost:5000/health
-# {"status":"ok","docker":true,"sandbox_image":true,"model":"inclusionai/ring-2.6-1t:free"}
-```
-
-## Docker sandbox
-
-Контейнер создаётся на каждый запуск кода с жёсткими ограничениями:
-
-```
---network none          нет интернета
---memory 512m           лимит RAM
---cpus 1.0              лимит CPU  
---read-only             root FS только для чтения
---tmpfs /tmp:128m       только /tmp записываемый
---cap-drop ALL          без linux capabilities
---security-opt no-new-privileges
-```
-
-Датасет и скрипт монтируются как `:ro` (read-only bind mount).
-
-## Защита от Prompt Injection
-
-Контекст пользователя проверяется на сервере:
-- 16 regex-паттернов (ignore instructions, jailbreak, sudo, roleplay, ...)
-- Лимит длины 3000 символов
-- Системный промпт явно запрещает LLM выполнять нон-аналитические задачи
